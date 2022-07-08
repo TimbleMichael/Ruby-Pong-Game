@@ -54,6 +54,20 @@ class Paddle
         end
     end
 
+    def trackBall(ball)
+        if ball.yMiddle > yMiddle
+            @y += @movementSpeed
+        elsif ball.yMiddle < yMiddle
+            @y -= @movementSpeed
+        end
+    end
+
+    private
+
+    def yMiddle
+        @y + (HEIGHT/2) 
+    end
+
     # Private method which can only be called within the class itslef, i.e. 'maxY' method can only be called in class 'Paddle'
     private
     def maxY
@@ -67,11 +81,11 @@ class Ball
     HEIGHT = 25
 
     attr_reader :shape
-    def initialize
+    def initialize(speed)
         @x = 320
         @y = 400
-        @yVelocity = 4
-        @xVelocity = -4
+        @yVelocity = speed
+        @xVelocity = -speed
     end
 
 
@@ -83,6 +97,14 @@ class Ball
 
     def bounce
         @xVelocity = -@xVelocity
+    end
+
+    def yMiddle
+        @y + (HEIGHT/2)
+    end
+
+    def outOfBounds
+        @x <= 0 || @shape.x2 >= Window.width
     end
 
     # The 'move' method allows the ball to move freely at a given @xVelocity and @yVelcoity
@@ -108,12 +130,14 @@ class Ball
     end
 end
 
+ballVelocity = 6
+
 # Initialising an INSTANT of PADDLE
 player = Paddle.new(:left,5)
 opponent = Paddle.new(:right,5)
 
 # Initialising an INSTANT of BALL
-ball = Ball.new
+ball = Ball.new(ballVelocity)
 
 # Refreshing the paddle for each cycle so that it would be displayed continuously
 # 'Clear' was added as to get rid of the old stuff and that the update is continous
@@ -128,9 +152,14 @@ update do
     player.draw
 
     opponent.draw
+    opponent.trackBall(ball)
 
     ball.move
     ball.draw
+
+    if ball.outOfBounds
+        ball = Ball.new(ballVelocity)
+    end
 end
 
 # Move player when key is pressed
